@@ -10,7 +10,6 @@ const char* fakeSSIDs[] = {
     "U can't connect to this!!"
 };
 const int numSSIDs = sizeof(fakeSSIDs) / sizeof(fakeSSIDs[0]);
-// ===========================================
 
 void sendBeacon(const char* ssid);
 
@@ -24,7 +23,6 @@ void setup() {
   digitalWrite(LED_PIN, LOW);
 
   unsigned long pressStartTime = 0;
-  Serial.println("\n=== ESP32 Fake Beacons - Reliable Version ===");
 
   // Clean start
   esp_wifi_stop();
