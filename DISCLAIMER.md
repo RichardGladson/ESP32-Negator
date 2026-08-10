@@ -1,8 +1,8 @@
-# Disclaimer
+# ⚠Disclaimer⚠
 
 **IMPORTANT LEGAL NOTICE**
 
-This repository and any associated hardware/software (referred to as the "Project") related to Wi-Fi jamming, signal interference, or radio frequency disruption is provided **strictly for educational, research, and informational purposes only**.
+This repository and any associated hardware/software (referred to as the "Project") related to Wi-Fi jamming, signal interference, or radio frequency disruption is provided **strictly for educational, research, and informational purposes only**. None of the code written here is intended to cause herm or disruption of any Wi-Fi network, public or private.
 
 ### Legal Warning
 
@@ -25,3 +25,5 @@ By accessing, downloading, cloning, forking, or using any part of this repositor
 If you are unsure about the legality of any activity related to radio frequency devices in your jurisdiction, consult a qualified attorney or the relevant regulatory authority (e.g., FCC in the United States) before proceeding.
 
 **Do not use this Project for any illegal purpose.**
+
+# **🚫Do not be a [_skid_](https://www.google.com/search?q=skid+meaning+in+programming+slang).**
