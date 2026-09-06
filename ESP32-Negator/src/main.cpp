@@ -47,7 +47,6 @@ void setup() {
       if (pressStartTime == 0) {
         pressStartTime = millis(); // Start the timer on initial press
       } else if (millis() - pressStartTime >= 2000) {
-        Serial.println("Hold detected! Proceeding to loop...");
         break; // Exit the setup block's blocking loop
       }
     } else {
