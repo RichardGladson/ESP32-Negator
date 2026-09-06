@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <LittleFS.h>
 
 // ================== CONFIG ==================
 #define BUTTON_PIN 0  // Boot button on standard ESP32 boards (active LOW)
@@ -206,7 +207,7 @@ const char* fakeSSIDs[1000] = {
     "Received_Signal_RSSI", "Quadrature_Amplitude_QAM", "Orthogonal_Frequency_OFDM", "Spread_Spectrum_FHSS", "Direct_Sequence_DSSS",
     "The_Final_SSID_1000", "End_Of_Array_Null", "String_Buffer_Overflow", "Array_Index_Out_Of_Bounds", "EOF_Reached_Goodbye"
 };
-int currentNumber = 1;
+int currentChannel = 1;
 const int numSSIDs = sizeof(fakeSSIDs) / sizeof(fakeSSIDs[0]);
 
 void sendBeacon(const char* ssid);
@@ -215,12 +216,8 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
   pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);
-  digitalWrite(LED_PIN, LOW);
-  
-  // Ensure LED is off during setup
-  
 
+  setCpuFrequencyMhz(240);
   // Clean start
   esp_wifi_stop();
   delay(100);
@@ -232,102 +229,24 @@ void setup() {
   delay(200);
 
   uint8_t mac[6];
+
+  unsigned long pressStartTime = 0;
   
-  
-  // Morse patterns for numbers 1-11
-  const char* patterns[] = {
-    ".",      // 1
-    "..",     // 2
-    "...",    // 3
-    "....",   // 4
-    "-",      // 5
-    "-.",     // 6
-    "-..",    // 7
-    "-...",   // 8
-    "-....",  // 9
-    "--",     // 10
-    "--."     // 11
-  };
-
-  // Function to blink the selected Morse pattern
-  auto beepPattern = [](const char* pattern) {
-    for (int i = 0; pattern[i] != '\0'; i++) {
-
-      digitalWrite(LED_PIN, HIGH);
-
-      if (pattern[i] == '.') {
-        delay(150);       // Dot
-      } else {
-        delay(550);       // Dash
-      }
-
-      digitalWrite(LED_PIN, LOW);
-
-      // Gap between Morse characters
-      delay(150);
-    }
-
-    // Gap after the complete number
-    delay(400);
-  };
-
-  // Show the initial selection: number 1
-  beepPattern(patterns[currentNumber - 1]);
-
   while (true) {
-
-    // BOOT button pressed
+    // The boot button is active-LOW (reads LOW when pressed)
     if (digitalRead(BUTTON_PIN) == LOW) {
-
-      unsigned long pressStart = millis();
-      bool longPress = false;
-
-      // Wait while button is held
-      while (digitalRead(BUTTON_PIN) == LOW) {
-
-        // Held for 2 seconds
-        if (millis() - pressStart >= 2000) {
-          longPress = true;
-          break;
-        }
-
-        delay(10);
+      if (pressStartTime == 0) {
+        pressStartTime = millis(); // Start the timer on initial press
+      } else if (millis() - pressStartTime >= 2000) {
+        Serial.println("Hold detected! Proceeding to loop...");
+        break; // Exit the setup block's blocking loop
       }
-
-      // Long press detected
-      if (longPress) {
-
-        // Don't continue until button is released
-        while (digitalRead(BUTTON_PIN) == LOW) {
-          delay(10);
-        }
-
-        // Confirmation: - - -
-        beepPattern("---");
-
-        // Leave setup() and continue to void loop()
-        return;
-      }
-
-      // Short press:
-      // Make absolutely sure the button has been released
-      while (digitalRead(BUTTON_PIN) == LOW) {
-        delay(10);
-      }
-
-      // Advance to next number
-      currentNumber++;
-
-      // Wrap 11 -> 1
-      if (currentNumber > 11) {
-        currentNumber = 1;
-      }
-
-      // Beep the newly selected number
-      beepPattern(patterns[currentNumber - 1]);
+    } else {
+      // Reset timer if the button is released prematurely
+      pressStartTime = 0;
     }
-
-    delay(10);
+    
+    delay(20); // Prevent watchdog trigger and debounce slightly
   }
 
   // Turn LED on once the button check passes
@@ -343,6 +262,8 @@ void loop() {
 void sendBeacon(const char* ssid) {
   int ssidLen = strlen(ssid);
   if (ssidLen > 32) ssidLen = 32;
+
+  esp_wifi_set_channel(currentChannel, WIFI_SECOND_CHAN_NONE);
 
   uint8_t packet[200];  // bigger buffer to be safe
   int offset = 0;
@@ -390,7 +311,7 @@ void sendBeacon(const char* ssid) {
   
   packet[offset++] = 0x03;
   packet[offset++] = 0x01;
-  packet[offset++] = currentNumber;   
+  packet[offset++] = currentChannel;   
 
   // Extended Supported Rates (helps a lot with modern phones)
   packet[offset++] = 0x32;
@@ -401,8 +322,9 @@ void sendBeacon(const char* ssid) {
 
   // Send it
   esp_err_t result = esp_wifi_80211_tx(WIFI_IF_STA, packet, offset, false);
-  currentNumber++;
-  if (currentNumber > 11) {
-    currentNumber = 1;
+  currentChannel++;
+  
+  if (currentChannel > 11) {
+    currentChannel = 1;
   }
 }
