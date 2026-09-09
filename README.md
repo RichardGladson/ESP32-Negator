@@ -10,10 +10,7 @@ Educational Wi-Fi Beacon Spammer/Jammer
 Operates on **2.4Ghz** frequency only  
 
 ### Guardrails:
-### NOT IMPLEMENTED YET DO NOT TAKE FOR GRANTED
-* Broadcasts **3** fake Wi-Fi networks only
-* 500ms delay to prevent interference 
-
+> ### YET TO BE IMPLEMENTED
 ## Hardware
 * ESP32 WROOM
 * Constant power supply (Micro USB/USB-C)
