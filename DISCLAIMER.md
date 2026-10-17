@@ -1,4 +1,4 @@
-# Disclaimer
+# ⚠Disclaimer⚠
 
 **IMPORTANT LEGAL NOTICE**
 
